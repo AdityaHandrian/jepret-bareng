@@ -1,3 +1,4 @@
+import { IconCheck, IconWaiting } from '../icons';
 // Mode jarak jauh: Berdua Jauh & Bareng Geng (F-13 s.d. F-19).
 // Modul ini (beserta PeerJS) hanya dimuat saat mode jarak jauh dibuka.
 import type { ComponentChildren, JSX } from 'preact';
@@ -9,9 +10,9 @@ import { getFrame } from '../../compose/frames';
 import { cellAspect, getLayout } from '../../compose/layouts';
 import { Room, type RoomState } from '../../room/room';
 import { joinLink, MAX_PARTICIPANTS, normalizeCode, type RoomMode, type RoomSettings } from '../../room/protocol';
-import { CameraErrorBox, Chips, CountdownOverlay, Header, QrImage, Spinner, Toggle, useCamera, VideoView } from '../components';
+import { CameraErrorBox, CountdownOverlay, CountdownPicker, Header, QrImage, Spinner, Toggle, useCamera, VideoView } from '../components';
 import { FramePicker, LayoutPicker } from '../pickers';
-import { settings } from '../settings';
+import { clampCountdown, settings } from '../settings';
 import { useStore } from '../store';
 import { ShotThumb } from '../ShotThumb';
 import { defaultDesign, type Design } from '../session';
@@ -48,7 +49,7 @@ export function Remote(props: { mode: RoomMode; joinCode?: string; onHome: () =>
       layoutId: design.layoutId,
       frameId: design.frameId,
       filterId: design.filterId,
-      countdown: s.countdown,
+      countdown: clampCountdown(s.countdown),
       challenges: s.challenges,
       oddOneOut: false,
     };
@@ -289,7 +290,7 @@ function Lobby(props: { room: Room; st: RoomState; design: Design; setDesign: (d
   const max = MAX_PARTICIPANTS[st.settings.mode];
   const me = st.participants.find((p) => p.id === st.selfId);
   const everyoneReady = st.participants.length >= 2 && st.participants.every((p) => p.ready);
-  const waText = encodeURIComponent(`Yuk jepret bareng! 📸 Buka link ini lalu izinkan kamera:\n${link}\nKode bilik: ${st.code}`);
+  const waText = encodeURIComponent(`Yuk jepret bareng! Buka link ini lalu izinkan kamera:\n${link}\nKode bilik: ${st.code}`);
 
   const copy = async () => {
     try {
@@ -315,7 +316,7 @@ function Lobby(props: { room: Room; st: RoomState; design: Design; setDesign: (d
                 Kirim link via WhatsApp
               </a>
               <button class="btn btn-small" onClick={() => void copy()}>
-                {copied ? 'Tersalin ✓' : 'Salin link'}
+                {copied ? 'Tersalin' : 'Salin link'}
               </button>
             </div>
           )}
@@ -337,7 +338,7 @@ function Lobby(props: { room: Room; st: RoomState; design: Design; setDesign: (d
               {p.host && <span class="badge">host</span>}
               {p.id === st.selfId && <span class="muted small"> (kamu)</span>}
               <span class="grow" />
-              <span aria-label={p.ready ? 'siap' : 'belum siap'}>{p.ready ? '✅' : '⏳'}</span>
+              <span class={p.ready ? 'ready-yes' : 'ready-no'} role="img" aria-label={p.ready ? 'siap' : 'belum siap'}>{p.ready ? <IconCheck /> : <IconWaiting />}</span>
             </li>
           ))}
         </ul>
@@ -355,12 +356,7 @@ function Lobby(props: { room: Room; st: RoomState; design: Design; setDesign: (d
             <FramePicker value={design.frameId} onChange={(frameId) => props.setDesign({ ...design, frameId })} />
           </section>
           <section class="card stack-sm">
-            <Chips
-              label="Lama hitung mundur"
-              value={st.settings.countdown}
-              options={[3, 5, 10].map((n) => ({ value: n, label: `${n} detik` }))}
-              onChange={(countdown) => room.updateSettings({ countdown })}
-            />
+            <CountdownPicker value={st.settings.countdown} onChange={(countdown) => room.updateSettings({ countdown })} />
             <Toggle label="Tantangan pose acak" checked={st.settings.challenges} onChange={(challenges) => room.updateSettings({ challenges })} />
             <Toggle
               label="Siapa yang beda?"

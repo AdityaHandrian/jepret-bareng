@@ -1,7 +1,9 @@
+import { IconClose, IconResize, IconUndo } from '../icons';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { canvasToBlob, composeBase, composeFinal, type Photo } from '../../compose/compose';
 import { getFilter } from '../../compose/filters';
-import { getFrame } from '../../compose/frames';
+import { customFrame, getFrame } from '../../compose/frames';
+import { useStore } from '../store';
 import { getLayout } from '../../compose/layouts';
 import { drawStrokes, INK_COLORS, STICKERS, type Decorations, type StickerItem } from '../../editor/model';
 import { Header, Spinner, Toggle } from '../components';
@@ -45,6 +47,8 @@ export function Editor(props: {
   const stageRef = useRef<HTMLDivElement>(null);
   const drawing = useRef<{ color: string; width: number; points: [number, number][] } | null>(null);
   const deco = d.deco;
+  // Frame kustom bisa diubah warnanya tanpa mengganti frameId; ikut pantau.
+  const custom = useStore(customFrame);
 
   // Komposisi dasar dihitung ulang (ditunda sejenak) saat filter/frame/teks berubah.
   useEffect(() => {
@@ -64,7 +68,7 @@ export function Editor(props: {
       alive = false;
       clearTimeout(t);
     };
-  }, [d.layoutId, d.frameId, d.filterId, d.caption, d.showDate, props.shots]);
+  }, [d.layoutId, d.frameId, d.filterId, d.caption, d.showDate, props.shots, custom]);
 
   useEffect(() => {
     if (!base || !baseRef.current) return;
@@ -202,7 +206,7 @@ export function Editor(props: {
         onBack={props.onBack}
         right={
           <button class="icon-btn" onClick={undo} disabled={!history.length} aria-label="Batalkan (undo)">
-            ↶
+            <IconUndo />
           </button>
         }
       />
@@ -250,10 +254,10 @@ export function Editor(props: {
                       setSelected(null);
                     }}
                   >
-                    ×
+                    <IconClose size={18} />
                   </button>
                   <span class="sticker-handle" aria-hidden="true" onPointerDown={(e) => onHandleDown(e as unknown as PointerEvent, s)}>
-                    ⤡
+                    <IconResize size={18} />
                   </span>
                 </>
               )}
@@ -304,7 +308,7 @@ export function Editor(props: {
                   </button>
                 </div>
               )}
-              {!sel && <p class="muted small">Ketuk stiker untuk menempel. Geser untuk memindah, tarik ⤡ untuk perbesar/putar.</p>}
+              {!sel && <p class="muted small">Ketuk stiker untuk menempel. Geser untuk memindah, tarik gagang kuning untuk perbesar/putar.</p>}
             </div>
           )}
           {tab === 'coret' && (
@@ -346,7 +350,7 @@ export function Editor(props: {
                 class="input"
                 maxLength={40}
                 value={d.caption}
-                placeholder="contoh: Anniv ke-2 💞"
+                placeholder="contoh: Anniv ke-2"
                 onInput={(e) => props.onChange({ ...d, caption: (e.target as HTMLInputElement).value })}
               />
               <Toggle label="Tampilkan tanggal" checked={d.showDate} onChange={(showDate) => props.onChange({ ...d, showDate })} />

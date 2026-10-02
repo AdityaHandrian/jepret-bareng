@@ -1,3 +1,4 @@
+import { ArtShutter, Sparkle } from '../icons';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { fileName } from '../../compose/compose';
@@ -23,7 +24,7 @@ async function shareBlob(blob: Blob, name: string): Promise<'shared' | 'cancelle
   const file = new File([blob], name, { type: blob.type });
   if (!navigator.canShare?.({ files: [file] })) return 'unsupported';
   try {
-    await navigator.share({ files: [file], title: 'Jepret Bareng', text: 'Strip foto dari #jepretbareng 📸' });
+    await navigator.share({ files: [file], title: 'Jepret Bareng', text: 'Strip foto dari #jepretbareng' });
     return 'shared';
   } catch (e) {
     return (e as DOMException).name === 'AbortError' ? 'cancelled' : 'unsupported';
@@ -65,7 +66,7 @@ export function Result(props: { outcome: Outcome; onAgain: () => void; againLabe
   return (
     <main class="screen result">
       <Confetti />
-      <Header title="Strip Jadi! 🎉" onBack={props.onHome} />
+      <Header title="Strip Jadi!" onBack={props.onHome} right={<ArtShutter size={40} />} />
       <div class="result-img-wrap">
         <img class="result-img" src={url} alt="Strip foto hasil sesi" />
       </div>
@@ -92,7 +93,7 @@ export function Result(props: { outcome: Outcome; onAgain: () => void; againLabe
         <button class="btn" onClick={props.onAgain}>
           {props.againLabel ?? 'Jepret Lagi'}
         </button>
-        <p class="muted small center">Kapsul waktu: simpan strip ini, buka lagi tahun depan ✨</p>
+        <p class="muted small center">Kapsul waktu: simpan strip ini, buka lagi tahun depan <Sparkle /></p>
       </div>
     </main>
   );

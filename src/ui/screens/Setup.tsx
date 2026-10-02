@@ -1,4 +1,4 @@
-import { Chips, Header, Toggle } from '../components';
+import { CountdownPicker, Header, Toggle } from '../components';
 import { FramePicker, LayoutPicker } from '../pickers';
 import { settings } from '../settings';
 import { useStore } from '../store';
@@ -24,13 +24,7 @@ export function Setup(props: { design: Design; onChange: (d: Design) => void; on
           <FramePicker value={d.frameId} onChange={(frameId) => props.onChange({ ...d, frameId })} />
         </section>
         <section class="card stack-sm">
-          <h2 class="section-title">Hitung mundur</h2>
-          <Chips
-            label="Lama hitung mundur"
-            value={s.countdown}
-            options={[3, 5, 10].map((n) => ({ value: n as 3 | 5 | 10, label: `${n} detik` }))}
-            onChange={(countdown) => settings.set({ countdown })}
-          />
+          <CountdownPicker value={s.countdown} onChange={(countdown) => settings.set({ countdown })} />
           <Toggle
             label="Tantangan pose acak"
             hint="Perintah lucu muncul sebelum tiap jepretan"

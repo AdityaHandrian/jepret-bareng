@@ -8,6 +8,7 @@ import { blobToCanvas, limitSize } from '../camera/camera';
 import { loadChallenges, pickRandom } from '../camera/challenges';
 import { canvasToBlob, type Photo } from '../compose/compose';
 import { getLayout } from '../compose/layouts';
+import { clampCountdown } from '../ui/settings';
 import { createStore, type Store } from '../ui/store';
 import { estimateOffset, hostToLocal, now, sampleFrom, type ClockSample } from './clock';
 import { ICE_SERVERS } from './ice';
@@ -330,7 +331,7 @@ export class Room {
     const order = this.value.participants.map((p) => p.id);
     const oddId = s.oddOneOut && order.length >= 2 ? order[Math.floor(Math.random() * order.length)] : null;
     const secretText = pickRandom(secrets, 1)[0];
-    const at = now() + s.countdown * 1000 + 600;
+    const at = now() + clampCountdown(s.countdown) * 1000 + 600;
     const challengeFor = (id: string) => (id === oddId ? secretText : s.challenges ? pose : null);
 
     const photos = new Map<string, Photo>();

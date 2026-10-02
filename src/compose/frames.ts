@@ -3,13 +3,14 @@
 // di public/frames/<tema>/<layout>.png (lihat CONTRIBUTING.md). PNG dimuat hanya saat dipakai.
 
 import type { LayoutId } from './layouts';
+import { createStore } from '../ui/store';
 
 export type Pattern = 'none' | 'dots' | 'stripes' | 'diamonds' | 'stars' | 'checker';
 
 export interface Frame {
   id: string;
   name: string;
-  category: 'Dasar' | 'Musiman' | 'Gaya';
+  category: 'Bebas' | 'Dasar' | 'Musiman' | 'Gaya';
   bg: string;
   /** Warna gradasi kedua (opsional). */
   bg2?: string;
@@ -34,7 +35,29 @@ export const FRAMES: Frame[] = [
   { id: 'batik', name: 'Batik', category: 'Gaya', bg: '#6b3b1f', bg2: '#8a5229', fg: '#fbe7c6', accent: '#c8894a', pattern: 'diamonds' },
 ];
 
+export const PATTERNS: { id: Pattern; name: string }[] = [
+  { id: 'none', name: 'Polos' },
+  { id: 'dots', name: 'Titik' },
+  { id: 'stripes', name: 'Garis' },
+  { id: 'checker', name: 'Kotak' },
+  { id: 'diamonds', name: 'Wajik' },
+  { id: 'stars', name: 'Bintang' },
+];
+
+export const CUSTOM_FRAME_ID = 'kustom';
+
+/** Frame bebas: warna & pola dipilih sendiri, disimpan di perangkat. */
+export const customFrame = createStore<Frame>(
+  { id: CUSTOM_FRAME_ID, name: 'Kustom', category: 'Bebas', bg: '#cfe8ff', fg: '#16324f', accent: '#ffffff', pattern: 'dots' },
+  'jepretbareng:frame-kustom',
+);
+
+export function setCustomFrame(patch: Partial<Frame>): void {
+  customFrame.set({ ...patch, id: CUSTOM_FRAME_ID, name: 'Kustom', category: 'Bebas', overlays: undefined });
+}
+
 export function getFrame(id: string): Frame {
+  if (id === CUSTOM_FRAME_ID) return customFrame.value;
   return FRAMES.find((f) => f.id === id) ?? FRAMES[0];
 }
 

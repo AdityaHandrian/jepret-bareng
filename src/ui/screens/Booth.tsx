@@ -1,3 +1,4 @@
+import { IconMirror, IconSwitchCamera } from '../icons';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { captureFrame, type Facing } from '../../camera/camera';
 import { loadChallenges, pickRandom } from '../../camera/challenges';
@@ -9,7 +10,7 @@ import { getLayout } from '../../compose/layouts';
 import { now } from '../../room/clock';
 import { CameraErrorBox, CountdownOverlay, Header, sleep, Spinner, useCamera, VideoView, type Cue } from '../components';
 import { FilterPicker } from '../pickers';
-import { settings } from '../settings';
+import { clampCountdown, settings } from '../settings';
 import { useStore } from '../store';
 import { ShotThumb } from '../ShotThumb';
 import type { Design } from '../session';
@@ -46,7 +47,7 @@ export function Booth(props: {
     const result = [...shots];
     for (let k = 0; k < indices.length; k++) {
       const i = indices[k];
-      const localAt = now() + s.countdown * 1000;
+      const localAt = now() + clampCountdown(s.countdown) * 1000;
       setCue({ localAt, index: i, total: layout.shots, challenge: poses[k] ?? null });
       await sleep(localAt - now());
       const v = videoRef.current;
@@ -86,7 +87,7 @@ export function Booth(props: {
             <>
               <div class="row center">
                 <button class="icon-btn" onClick={() => setFacing(facing === 'user' ? 'environment' : 'user')} aria-label="Ganti kamera depan/belakang">
-                  🔄
+                  <IconSwitchCamera />
                 </button>
                 <button
                   class="btn btn-big btn-primary grow"
@@ -101,7 +102,7 @@ export function Booth(props: {
                   onClick={() => settings.set({ mirror: !s.mirror })}
                   aria-label={s.mirror ? 'Matikan efek cermin' : 'Nyalakan efek cermin'}
                 >
-                  🪞
+                  <IconMirror />
                 </button>
               </div>
               <FilterPicker value={props.design.filterId} onChange={(filterId) => props.onChangeDesign({ ...props.design, filterId })} />

@@ -1,3 +1,5 @@
+import { IconBack } from './icons';
+import { clampCountdown, COUNTDOWN_MAX, COUNTDOWN_MIN } from './settings';
 import type { ComponentChildren, Ref } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { beep, shutter } from '../camera/sound';
@@ -10,7 +12,7 @@ export function Header(props: { title: string; onBack?: () => void; right?: Comp
     <header class="topbar">
       {props.onBack ? (
         <button class="icon-btn" onClick={props.onBack} aria-label="Kembali">
-          ‹
+          <IconBack />
         </button>
       ) : (
         <span class="icon-spacer" />
@@ -251,3 +253,37 @@ export function Spinner(props: { label: string }) {
 }
 
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Pengatur hitung mundur bebas 1–10 detik. */
+export function CountdownPicker(props: { value: number; onChange: (n: number) => void }) {
+  const v = clampCountdown(props.value);
+  const set = (n: number) => props.onChange(clampCountdown(n));
+  return (
+    <div class="countdown-picker">
+      <div class="row">
+        <span class="grow">Hitung mundur</span>
+        <output class="countdown-value" aria-live="polite">
+          {v} detik
+        </output>
+      </div>
+      <div class="row">
+        <button class="icon-btn" onClick={() => set(v - 1)} disabled={v <= COUNTDOWN_MIN} aria-label="Kurangi satu detik">
+          −
+        </button>
+        <input
+          class="grow"
+          type="range"
+          min={COUNTDOWN_MIN}
+          max={COUNTDOWN_MAX}
+          step={1}
+          value={v}
+          aria-label="Lama hitung mundur dalam detik"
+          onInput={(e) => set(Number((e.target as HTMLInputElement).value))}
+        />
+        <button class="icon-btn" onClick={() => set(v + 1)} disabled={v >= COUNTDOWN_MAX} aria-label="Tambah satu detik">
+          +
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,5 +1,6 @@
 import { LAYOUTS, type LayoutId } from '../compose/layouts';
-import { FRAMES } from '../compose/frames';
+import { CUSTOM_FRAME_ID, customFrame, FRAMES, PATTERNS, setCustomFrame, type Frame } from '../compose/frames';
+import { useStore } from './store';
 import { FILTERS, filterCss } from '../compose/filters';
 
 export function LayoutPicker(props: { value: LayoutId; onChange: (id: LayoutId) => void }) {
@@ -36,10 +37,69 @@ export function LayoutPicker(props: { value: LayoutId; onChange: (id: LayoutId) 
   );
 }
 
+function swatchStyle(f: Frame) {
+  return { background: f.bg2 ? `linear-gradient(135deg, ${f.bg}, ${f.bg2})` : f.bg, borderColor: f.accent, color: f.fg };
+}
+
+/** Frame bebas: pilih warna latar/pola/teks dan pola sendiri. */
+function CustomFrameEditor() {
+  const f = useStore(customFrame);
+  const color = (label: string, value: string, onChange: (v: string) => void) => (
+    <label class="color-field">
+      <input type="color" value={value} onInput={(e) => onChange((e.target as HTMLInputElement).value)} />
+      <span>{label}</span>
+    </label>
+  );
+  return (
+    <div class="custom-frame card stack-sm">
+      <div class="row wrap">
+        {color('Latar', f.bg, (bg) => setCustomFrame({ bg }))}
+        {f.bg2 !== undefined && color('Latar 2', f.bg2, (bg2) => setCustomFrame({ bg2 }))}
+        {color('Pola', f.accent, (accent) => setCustomFrame({ accent }))}
+        {color('Teks', f.fg, (fg) => setCustomFrame({ fg }))}
+      </div>
+      <label class="toggle">
+        <input
+          type="checkbox"
+          checked={f.bg2 !== undefined}
+          onChange={(e) => setCustomFrame({ bg2: (e.target as HTMLInputElement).checked ? '#ffd6e0' : undefined })}
+        />
+        <span class="toggle-track" aria-hidden="true" />
+        <span>Gradasi dua warna</span>
+      </label>
+      <div class="chips" role="radiogroup" aria-label="Pola frame">
+        {PATTERNS.map((pt) => (
+          <button
+            key={pt.id}
+            role="radio"
+            aria-checked={f.pattern === pt.id}
+            class={`chip ${f.pattern === pt.id ? 'chip-on' : ''}`}
+            onClick={() => setCustomFrame({ pattern: pt.id })}
+          >
+            {pt.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function FramePicker(props: { value: string; onChange: (id: string) => void }) {
   const cats = [...new Set(FRAMES.map((f) => f.category))];
+  const custom = useStore(customFrame);
+  const customOn = props.value === CUSTOM_FRAME_ID;
   return (
     <div class="frame-picker">
+      <p class="mini-heading">Bebas</p>
+      <div class="scroller" role="radiogroup" aria-label="Frame bebas">
+        <button role="radio" aria-checked={customOn} class={`pick-card ${customOn ? 'pick-on' : ''}`} onClick={() => props.onChange(CUSTOM_FRAME_ID)}>
+          <span class="frame-swatch frame-swatch-custom" style={swatchStyle(custom)}>
+            Aa
+          </span>
+          <span class="pick-label">Warna sendiri</span>
+        </button>
+      </div>
+      {customOn && <CustomFrameEditor />}
       {cats.map((cat) => (
         <div key={cat}>
           <p class="mini-heading">{cat}</p>

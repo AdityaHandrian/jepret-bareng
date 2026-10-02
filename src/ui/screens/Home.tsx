@@ -1,3 +1,4 @@
+import { ArtDuo, ArtGeng, ArtSolo, IconAuto, IconMoon, IconSoundOff, IconSoundOn, IconSun, LogoCamera } from '../icons';
 import { useState } from 'preact/hooks';
 import { normalizeCode } from '../../room/protocol';
 import { settings, type Theme } from '../settings';
@@ -24,17 +25,15 @@ export function Home(props: {
           aria-label={s.sound ? 'Matikan suara' : 'Nyalakan suara'}
           aria-pressed={s.sound}
         >
-          {s.sound ? '🔊' : '🔇'}
+          {s.sound ? <IconSoundOn /> : <IconSoundOff />}
         </button>
         <button class="icon-btn" onClick={() => settings.set({ theme: nextTheme[s.theme] })} aria-label={themeLabel[s.theme]}>
-          {s.theme === 'dark' ? '🌙' : s.theme === 'light' ? '☀️' : '🌗'}
+          {s.theme === 'dark' ? <IconMoon /> : s.theme === 'light' ? <IconSun /> : <IconAuto />}
         </button>
       </div>
 
       <div class="logo" aria-label="Jepret Bareng">
-        <span class="logo-cam" aria-hidden="true">
-          📸
-        </span>
+        <LogoCamera />
         <span class="logo-text">
           Jepret <b>Bareng</b>
         </span>
@@ -43,23 +42,17 @@ export function Home(props: {
 
       <div class="mode-cards">
         <button class="mode-card mode-solo" onClick={props.onSolo}>
-          <span class="mode-emoji" aria-hidden="true">
-            🤳
-          </span>
+          <span class="mode-emoji"><ArtSolo /></span>
           <span class="mode-title">Sendiri / Satu HP</span>
           <span class="mode-desc">Rame-rame di satu layar. Jalan juga tanpa internet.</span>
         </button>
         <button class="mode-card mode-duo" onClick={() => props.onRemote('duo')}>
-          <span class="mode-emoji" aria-hidden="true">
-            💞
-          </span>
+          <span class="mode-emoji"><ArtDuo /></span>
           <span class="mode-title">Berdua Jauh</span>
           <span class="mode-desc">Dua HP beda kota, satu strip bareng.</span>
         </button>
         <button class="mode-card mode-geng" onClick={() => props.onRemote('geng')}>
-          <span class="mode-emoji" aria-hidden="true">
-            🎉
-          </span>
+          <span class="mode-emoji"><ArtGeng /></span>
           <span class="mode-title">Bareng Geng</span>
           <span class="mode-desc">Sampai 4 orang dari mana saja, gabung pakai kode.</span>
         </button>
