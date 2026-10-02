@@ -1,6 +1,6 @@
 import { Header } from '../components';
 
-export const REPO_URL = 'https://github.com/jepretbareng/jepret-bareng';
+export const REPO_URL = 'https://github.com/AdityaHandrian/jepret-bareng';
 
 export function About(props: { onBack: () => void }) {
   return (
