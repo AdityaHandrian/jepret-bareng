@@ -353,7 +353,7 @@ function Lobby(props: { room: Room; st: RoomState; design: Design; setDesign: (d
           </section>
           <section>
             <h2 class="section-title">Frame</h2>
-            <FramePicker value={design.frameId} onChange={(frameId) => props.setDesign({ ...design, frameId })} />
+            <FramePicker layoutId={design.layoutId} value={design.frameId} onChange={(frameId) => props.setDesign({ ...design, frameId })} />
           </section>
           <section class="card stack-sm">
             <CountdownPicker value={st.settings.countdown} onChange={(countdown) => room.updateSettings({ countdown })} />

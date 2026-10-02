@@ -21,7 +21,7 @@ export function Setup(props: { design: Design; onChange: (d: Design) => void; on
         </section>
         <section>
           <h2 class="section-title">Frame</h2>
-          <FramePicker value={d.frameId} onChange={(frameId) => props.onChange({ ...d, frameId })} />
+          <FramePicker layoutId={d.layoutId} value={d.frameId} onChange={(frameId) => props.onChange({ ...d, frameId })} />
         </section>
         <section class="card stack-sm">
           <CountdownPicker value={s.countdown} onChange={(countdown) => settings.set({ countdown })} />

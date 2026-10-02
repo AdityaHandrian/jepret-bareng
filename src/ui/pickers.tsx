@@ -1,4 +1,7 @@
-import { LAYOUTS, type LayoutId } from '../compose/layouts';
+import { useEffect, useRef } from 'preact/hooks';
+import { getLayout, LAYOUTS, type LayoutId } from '../compose/layouts';
+import { drawFrameBackground } from '../compose/frames';
+import { FONT } from '../compose/compose';
 import { CUSTOM_FRAME_ID, customFrame, FRAMES, PATTERNS, setCustomFrame, type Frame } from '../compose/frames';
 import { useStore } from './store';
 import { FILTERS, filterCss } from '../compose/filters';
@@ -41,8 +44,54 @@ function swatchStyle(f: Frame) {
   return { background: f.bg2 ? `linear-gradient(135deg, ${f.bg}, ${f.bg2})` : f.bg, borderColor: f.accent, color: f.fg };
 }
 
+/** Pratinjau bingkai: latar + pola + slot contoh + teks contoh sesuai layout. */
+function FramePreview(props: { frame: Frame; layoutId: LayoutId }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const layout = getLayout(props.layoutId);
+  const scale = Math.min(150 / layout.width, 260 / layout.height);
+  const w = Math.round(layout.width * scale);
+  const h = Math.round(layout.height * scale);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = w * dpr;
+    c.height = h * dpr;
+    const ctx = c.getContext('2d')!;
+    ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+    const f = props.frame;
+    drawFrameBackground(ctx, f, layout.width, layout.height);
+    for (const s of layout.slots) {
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(s.x, s.y, s.w, s.h, 18);
+      else ctx.rect(s.x, s.y, s.w, s.h);
+      ctx.fill();
+      // Siluet orang sebagai contoh foto.
+      ctx.fillStyle = 'rgba(43,27,34,0.25)';
+      const cx = s.x + s.w / 2;
+      const r = Math.min(s.w, s.h) * 0.16;
+      ctx.beginPath();
+      ctx.arc(cx, s.y + s.h * 0.42, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx, s.y + s.h, r * 2, r * 1.6, 0, Math.PI, 0);
+      ctx.fill();
+    }
+    const ft = layout.footer;
+    ctx.fillStyle = f.fg;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `600 64px ${FONT}`;
+    ctx.fillText('Caption kamu', ft.x + ft.w / 2, ft.y + ft.h * 0.36);
+    ctx.font = `400 34px ${FONT}`;
+    ctx.fillText('2 Oktober 2026', ft.x + ft.w / 2, ft.y + ft.h * 0.36 + 72);
+  }, [props.frame, props.layoutId]);
+  return <canvas ref={ref} class="frame-preview" style={{ width: `${w}px`, height: `${h}px` }} role="img" aria-label="Pratinjau bingkai kustom" />;
+}
+
 /** Frame bebas: pilih warna latar/pola/teks dan pola sendiri. */
-function CustomFrameEditor() {
+function CustomFrameEditor(props: { layoutId: LayoutId }) {
   const f = useStore(customFrame);
   const color = (label: string, value: string, onChange: (v: string) => void) => (
     <label class="color-field">
@@ -51,7 +100,9 @@ function CustomFrameEditor() {
     </label>
   );
   return (
-    <div class="custom-frame card stack-sm">
+    <div class="custom-frame card">
+      <FramePreview frame={f} layoutId={props.layoutId} />
+      <div class="stack-sm grow">
       <div class="row wrap">
         {color('Latar', f.bg, (bg) => setCustomFrame({ bg }))}
         {f.bg2 !== undefined && color('Latar 2', f.bg2, (bg2) => setCustomFrame({ bg2 }))}
@@ -80,11 +131,12 @@ function CustomFrameEditor() {
           </button>
         ))}
       </div>
+      </div>
     </div>
   );
 }
 
-export function FramePicker(props: { value: string; onChange: (id: string) => void }) {
+export function FramePicker(props: { value: string; onChange: (id: string) => void; layoutId?: LayoutId }) {
   const cats = [...new Set(FRAMES.map((f) => f.category))];
   const custom = useStore(customFrame);
   const customOn = props.value === CUSTOM_FRAME_ID;
@@ -99,7 +151,7 @@ export function FramePicker(props: { value: string; onChange: (id: string) => vo
           <span class="pick-label">Warna sendiri</span>
         </button>
       </div>
-      {customOn && <CustomFrameEditor />}
+      {customOn && <CustomFrameEditor layoutId={props.layoutId ?? 'strip4'} />}
       {cats.map((cat) => (
         <div key={cat}>
           <p class="mini-heading">{cat}</p>

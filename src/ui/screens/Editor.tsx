@@ -276,7 +276,7 @@ export function Editor(props: {
         </div>
         <div class="tab-body" role="tabpanel">
           {tab === 'filter' && <FilterPicker value={d.filterId} onChange={(filterId) => props.onChange({ ...d, filterId })} />}
-          {tab === 'frame' && <FramePicker value={d.frameId} onChange={(frameId) => props.onChange({ ...d, frameId })} />}
+          {tab === 'frame' && <FramePicker layoutId={d.layoutId} value={d.frameId} onChange={(frameId) => props.onChange({ ...d, frameId })} />}
           {tab === 'stiker' && (
             <div class="stack-sm">
               <div class="scroller">

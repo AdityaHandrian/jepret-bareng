@@ -1145,3 +1145,18 @@ label {
   border: none;
   border-radius: 50%;
 }
+.custom-frame {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.frame-preview {
+  flex: none;
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  margin: 0 auto;
+}
+.custom-frame .stack-sm {
+  min-width: 200px;
+}
